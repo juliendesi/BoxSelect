@@ -1,66 +1,71 @@
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class DATA {
     private Object[] nodes_list;
     private ArrayList<ELEMENT> elements_list;
+    private int current_line_index;
+
 
     public DATA(String adresse_fichier){
 
-        elements_list = new ArrayList<ELEMENT>();
-        ArrayList<String> recup_fichier = new ArrayList<String>();
+        elements_list = new ArrayList<>();
+        long time = System.currentTimeMillis();
+        ArrayList<String> recup_fichier = this.getStringFromFile(adresse_fichier);
+
+        int node_id;
+        double[] node_coord = new double[3];
+
+        ArrayList<NODE> array_nodes_list = new ArrayList<>();
+        PARSER parser = new PARSER(" I (int) X (double) Y (double) Z (double)");
+
+        // Tant que la ligne ne contient pas ".NOE", on avance
+        for (current_line_index = 0; recup_fichier.get(current_line_index).contentEquals(".NOE") == false; current_line_index++) {
+        }
+        while (true){
+
+            // Boucle jusqu'à ".xxx" ou si la ligne est vide ou ne contient que des spaces
+            current_line_index++;
+
+            // Utilisation d'un parser pour récupérer les données
+            if (parser.parseFromLine(recup_fichier.get(current_line_index)) == -1) {
+                break;
+            }
+            Object[] result = parser.getResult();
+            node_id = (int) result[0];
+            for (int i = 0; i < 3; i++) {
+                node_coord[i] = (double) result[i + 1];
+            }
+            array_nodes_list.add(new NODE(node_id, node_coord, false));
+        }
+        System.out.println("Temps d'exécution : " + (System.currentTimeMillis() - time) + "ms");
+    }
+
+    private ArrayList<String> getStringFromFile(String adresse_fichier) {
+        ArrayList<String> recup_fichier = new ArrayList<>();
         String ligne;
         int nb_ligne = 0;
-        long time = System.currentTimeMillis();
         try {
             final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(adresse_fichier)));
-            //final Scanner scanner = new Scanner(new BufferedReader(new InputStreamReader(new FileInputStream(adresse_fichier)))).useLocale(Locale.US); // Locale : définit le séparateur decimal "."
             try {
-                while ((ligne = br.readLine()) != null){
+                while ((ligne = br.readLine()) != null) {
                     recup_fichier.add(ligne);
                     nb_ligne++;
                 }
-            }
-            finally {
+            } finally {
                 br.close();
             }
-        }
-        catch (IOException exception) {
-            System.out.println ("Le fichier n'a pas été trouvé");
+        } catch (IOException exception) {
+            System.out.println("Le fichier n'a pas été trouvé");
         }
         System.out.println("Nombre de ligne à traiter : " + nb_ligne);
 
-        int position_lecture, node_id;
-        double[] node_coord = new double[3];
-        Object[] result;
-        ArrayList<NODE> array_nodes_list = new ArrayList<NODE>();
-        PARSER parser = new PARSER(" I (int) X (double) Y (double) Z (double)");
-        for (position_lecture = 0;recup_fichier.get(position_lecture).contentEquals(".NOE") == false; position_lecture++){ }
-        while (true){
-            position_lecture++;
-            Scanner scan = new Scanner(recup_fichier.get(position_lecture)).useLocale(Locale.US);
-            if (scan.hasNext() == false){ break; }
-            ligne = scan.next();
-            if (ligne.contentEquals("I") == false){ break; }
-
-            result = parser.getResultFromLine(recup_fichier.get(position_lecture));
-            node_id = (int) result[0];
-            //node_id = convertInteger(recup_fichier.get(position_lecture),0);//scan.nextInt();
-            /*for (int i = 0; i<3; i++){
-                ligne = scan.next();
-                node_coord[i] = scan.nextDouble();
-            }*/
-            array_nodes_list.add(new NODE(node_id, node_coord, false));
-            scan.close();
-        }
-                    //this.getNodesAndElementsFromFile(scanner);
-
-
-
-        System.out.println("Temps d'exécution : " + (System.currentTimeMillis() - time) + "ms");
+        return recup_fichier;
     }
 
     private void getNodesAndElementsFromFile(Scanner scanner){
