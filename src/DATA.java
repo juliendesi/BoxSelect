@@ -3,17 +3,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
 
 public class DATA {
-    private Object[] nodes_list;
+    private ArrayList<NODE> nodes_list;
     private ArrayList<ELEMENT> elements_list;
     private int current_line_index;
 
 
     public DATA(String adresse_fichier){
-
+        nodes_list = new ArrayList<>();
         elements_list = new ArrayList<>();
         long time = System.currentTimeMillis();
         ArrayList<String> recup_fichier = this.getStringFromFile(adresse_fichier);
@@ -21,12 +19,11 @@ public class DATA {
         int node_id;
         double[] node_coord = new double[3];
 
-        ArrayList<NODE> array_nodes_list = new ArrayList<>();
-        PARSER parser = new PARSER(" I (int) X (double) Y (double) Z (double)");
+        PARSER parser = new PARSER(" I (int) X (double) Y (double) Z (double)", '$');
 
         // Tant que la ligne ne contient pas ".NOE", on avance
-        for (current_line_index = 0; recup_fichier.get(current_line_index).contentEquals(".NOE") == false; current_line_index++) {
-        }
+        for (current_line_index = 0; recup_fichier.get(current_line_index).contentEquals(".NOE") == false; current_line_index++)
+            ;
         while (true){
 
             // Boucle jusqu'à ".xxx" ou si la ligne est vide ou ne contient que des spaces
@@ -34,15 +31,39 @@ public class DATA {
 
             // Utilisation d'un parser pour récupérer les données
             if (parser.parseFromLine(recup_fichier.get(current_line_index)) == -1) {
-                break;
+                if (recup_fichier.get(current_line_index).contains(".") == true) {
+                    break;
+                } else continue;
+
             }
             Object[] result = parser.getResult();
             node_id = (int) result[0];
             for (int i = 0; i < 3; i++) {
                 node_coord[i] = (double) result[i + 1];
             }
-            array_nodes_list.add(new NODE(node_id, node_coord, false));
+            nodes_list.add(new NODE(node_id, node_coord, false));
         }
+
+        for (int i = current_line_index; recup_fichier.get(i).contentEquals(".MAI") == false; i++) {
+            current_line_index = i;
+        }
+        parser.setPattern("I (int) N [(int) ]/ 0 [(int) ]");
+        while (true) {
+            current_line_index++;
+            if (parser.parseFromLine(recup_fichier.get(current_line_index)) == -1) {
+                if (recup_fichier.get(current_line_index).contains(".") == true) {
+                    break;
+                } else continue;
+
+            }
+            Object[] result = parser.getResult();
+            node_id = (int) result[0];
+            for (int i = 0; i < 3; i++) {
+                node_coord[i] = (double) result[i + 1];
+            }
+            nodes_list.add(new NODE(node_id, node_coord, false));
+        }
+
         System.out.println("Temps d'exécution : " + (System.currentTimeMillis() - time) + "ms");
     }
 
@@ -68,32 +89,9 @@ public class DATA {
         return recup_fichier;
     }
 
-    private void getNodesAndElementsFromFile(Scanner scanner){
+    /*private void getNodesAndElementsFromFile(Scanner scanner){
         String commande = "";
         int node_id, elem_id;
-        ArrayList<NODE> array_nodes_list = new ArrayList<NODE>();
-        double[] node_coord = new double[3];
-        ArrayList<Integer> node_id_list = new ArrayList<Integer>();
-
-        while (commande.contentEquals(".NOE") == false ){
-            commande = scanner.next();
-        }
-        commande = scanner.next();
-        while (commande.charAt(0) != '.') {
-            try {
-                node_id = scanner.nextInt();
-                for (int i = 0; i<3; i++){
-                    scanner.next();
-                    node_coord[i] = scanner.nextDouble();
-                }
-                array_nodes_list.add(new NODE(node_id, node_coord, false));
-                commande = scanner.next();
-            }
-            catch (NoSuchElementException exception) {
-                break;
-            }
-        }
-        this.nodes_list = array_nodes_list.toArray();
 
         // Si commande = ".MAI", on skip jusqu'à "I"
         if (commande.contentEquals(".MAI")) {
@@ -158,36 +156,53 @@ public class DATA {
             }
         }
 
-    }
+    }*/
     
     private ArrayList<NODE> recupNodesFromId(ArrayList<Integer> param_nodes_list){
-        ArrayList<NODE> final_nodes_list = new ArrayList<NODE>();
+        ArrayList<NODE> final_nodes_list = new ArrayList<>();
 
-        /*for (int id : param_nodes_list)
-            for (Object node_in_list : this.nodes_list)
-                if (node_in_list.getNode_id() == id){
-                    final_nodes_list.add(node_in_list);
-                    break;
-                }*/
+        for (int id : param_nodes_list) {
+            final_nodes_list.add(searchNodeFromID(id));
+        }
+
         return final_nodes_list;
     }
 
-    private int convertInteger(String ligne, int position){
-        int i = 0;
-        int debut, fin;
-        while (ligne.charAt(i) != 'I') {
-            i++;
-        }
-        i++;
-        while (ligne.charAt(i) == ' '){
-            i++;
-        }
-        debut = i;
-        while (ligne.charAt(i) != ' '){
-            i++;
-        }
-        fin = i;
+    private NODE searchNodeFromID(int searched_id) {
+        int borne_test, borne_inf, borne_sup;
+        int id_test, id_inf, id_sup;
 
-        return Integer.parseInt(ligne.substring(debut,fin));
+        // Initialisation
+        borne_inf = 0;
+        borne_sup = nodes_list.size() - 1;
+
+        id_inf = nodes_list.get(borne_inf).getNode_id();
+        if (id_inf == searched_id) {
+            return nodes_list.get(borne_inf);
+        }
+
+        id_sup = nodes_list.get(borne_sup).getNode_id();
+        if (id_sup == searched_id) {
+            return nodes_list.get(borne_sup);
+        }
+
+        borne_test = (borne_inf + borne_sup) / 2;
+        while (borne_inf != borne_test) {
+            // test de la valeur milieu
+            // si valeur cherchée > choisir milieu de la partie sup
+            id_test = nodes_list.get(borne_test).getNode_id();
+            if (id_test == searched_id) {
+                return nodes_list.get(borne_test);
+            }
+
+            if (searched_id > id_test) {
+                borne_sup = borne_test;
+            } else {
+                borne_inf = borne_test;
+            }
+            borne_test = (borne_inf + borne_sup) / 2;
+        }
+        System.out.println("Erreur : le noeud " + searched_id + " n'est pas présent dans le modèle");
+        return null;
     }
 }
