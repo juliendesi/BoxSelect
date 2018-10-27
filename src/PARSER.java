@@ -5,6 +5,7 @@ import static java.lang.Character.isDigit;
 
 public class PARSER {
     private ArrayList<Object>[] result;
+    private int index_result;
 
     private String pattern;
     private int position_pattern;
@@ -109,87 +110,61 @@ public class PARSER {
     //      soit une fin de ligne atteinte sans retour chariot
     //      les valeurs sont stockées dans une ArrayList<Object>
     private int recognizePattern(String param_pattern, int debut_pattern, String param_ligne, int debut_line, int param_index_result) {
-        int position = debut_line, index_result = param_index_result;
+        index_result = param_index_result;
         char carac;
-        String commande = "", ligne = param_ligne;
-        if (ligne == "") {
-            ligne = texte.get(debut_texte);
+        String commande = "";
+
+        position_ligne_courante = debut_line;
+        ligne_courante = param_ligne;
+
+        if (ligne_courante == "") {
+            ligne_courante = texte.get(debut_texte);
             carac_return_detected = false;
         }
 
-        for (int i = debut_pattern; i < param_pattern.length(); i++) {
-            carac = param_pattern.charAt(i);
+        for (position_pattern = debut_pattern; position_pattern < param_pattern.length(); position_pattern++) {
+            carac = param_pattern.charAt(position_pattern);
+
+            // Gestion des erreurs
             if (fin_line_detected == true) { //
                 //tester si le prochain carac autre que space est facultatif (*)
-                int find_option = i;
+                int find_option = position_pattern;
                 find_option = ignoreSpace(param_pattern, find_option);
                 if (param_pattern.charAt(find_option) == '*') {
-                    return position;
+                    return position_ligne_courante;
                 } else return -1;
             }
             if (pattern_unrecognized == true) {
                 return -1;
             }
             if (detected_error == true) {
-                return position;
+                return position_ligne_courante;
             }
             if (carac_return_detected == true) {
-                ligne = texte.get(debut_texte);
+                ligne_courante = texte.get(debut_texte);
             }
+
+            // Récupération des éléments du pattern
             if (carac == ' ') {
-                position = ignoreSpace(ligne, position);
+                position_ligne_courante = ignoreSpace(ligne_courante, position_ligne_courante);
             } else if (carac == '[') {
-                i++;
-                while (param_pattern.charAt(i) != ']') {
-                    pattern_temp = pattern_temp + param_pattern.charAt(i);
-                    i++;
-                }
-                for (int a = i; a < param_pattern.length(); a++)
-                    if (param_pattern.charAt(a) == '/') {
-                        carac_arret = param_pattern.charAt(a + 1);
-                        break;
-                    }
-                while (detected_error != true && pattern_unrecognized != true) {
-                    position = recognizePattern(pattern_temp, 0, ligne, position, index_result);
-                }
-                if (carac_return_detected == true && pattern_unrecognized == false) {
-                    ligne = texte.get(debut_texte);
-                    carac_return_detected = false;
-                }
-
-                if (fin_line_detected == false && pattern_unrecognized == false) {
-                    if (ligne.charAt(position) == carac_arret) {
-                        detected_error = false;
-                    }
-                }
-
-                pattern_temp = "";
-                index_result++;
+                this.gestionCrochet(param_pattern);
             } else if (carac == '(') {
-                i++;
-                while (param_pattern.charAt(i) != ')') {
-                    commande = commande + param_pattern.charAt(i);
-                    i++;
-                }
-                switch (commande) {
-                    case "int":
-                        position = getInteger(ligne, position, index_result);
-                        break;
-                    case "double":
-                        position = getDouble(ligne, position, index_result);
-                        break;
-                }
-                index_result++;
-                commande = "";
+                this.gestionParenthese(param_pattern);
             } else if (carac == '/') {
-                i++;
-                carac = param_pattern.charAt(i);
-                position = ignoreWord(ligne, position, carac);
+                position_pattern++;
+                carac = ligne_courante.charAt(position_ligne_courante);
+                while (Character.isLetterOrDigit(carac)) {
+                    position_ligne_courante = ignoreWord(ligne_courante, position_ligne_courante, carac);
+                    carac = ligne_courante.charAt(position_ligne_courante);
+                }
+
+
             } else if (isDigit(carac) == false && carac != '*') {
-                position = ignoreWord(ligne, position, carac);
+                position_ligne_courante = ignoreWord(ligne_courante, position_ligne_courante, carac);
             }
         }
-        return position;
+        return position_ligne_courante;
     }
 
     public ArrayList<Object>[] getResult() {
@@ -349,8 +324,102 @@ public class PARSER {
         return i;
     }
 
-    private int gestionCrochet() {
+    private int getString(String ligne, int debut, int indice_result) {
+        int i;
+        boolean char_detected = false;
 
+        if (ligne.charAt(debut) == carac_return) {
+            // gestion retour à la ligne dans cas recognizeFromText
+            carac_return_detected = true;
+            debut_texte++;
+            if (debut_texte == texte.size()) {
+                pattern_unrecognized = true;
+                return debut;
+            }
+            debut = 0;
+            ligne = texte.get(debut_texte);
+            debut = ignoreSpace(ligne, debut);
+        }
+
+        if (debut == ligne.length()) {
+            detected_error = true;
+            fin_line_detected = true;
+            return debut;
+        } else if (ligne.charAt(debut) == carac_arret) {
+            detected_error = true;
+            return debut;
+        }
+
+        for (i = debut; i < ligne.length(); i++) {
+            if (ligne.charAt(i) == ' ') {
+                char_detected = true;
+                break;
+            }
+            if (ligne.charAt(i) != '_' && ligne.charAt(i) != '#')
+                if (Character.isLetter(ligne.charAt(i)) == false) {
+                    char_detected = true;
+                    break;
+                }
+        }
+
+        if (char_detected == false) {
+            result[indice_result].add(ligne.substring(debut));
+        } else result[indice_result].add(ligne.substring(debut, i));
+
+        return i;
+    }
+
+    private void gestionCrochet(String param_pattern) {
+        position_pattern++;
+        while (param_pattern.charAt(position_pattern) != ']') {
+            pattern_temp = pattern_temp + param_pattern.charAt(position_pattern);
+            position_pattern++;
+        }
+        for (int a = position_pattern; a < param_pattern.length(); a++)
+            if (param_pattern.charAt(a) == '/') {
+                carac_arret = param_pattern.charAt(a + 1);
+                break;
+            }
+
+        int position_pattern_origine = position_pattern;
+        int index_result_origine = index_result;
+        while (detected_error != true && pattern_unrecognized != true) {
+            position_ligne_courante = recognizePattern(pattern_temp, 0, ligne_courante, position_ligne_courante, index_result_origine);
+            index_result = index_result_origine;
+        }
+        position_pattern = position_pattern_origine;
+        if (carac_return_detected == true && pattern_unrecognized == false) {
+            ligne_courante = texte.get(debut_texte);
+            carac_return_detected = false;
+        }
+
+        if (fin_line_detected == false && pattern_unrecognized == false) {
+            if (ligne_courante.charAt(position_ligne_courante) == carac_arret) {
+                detected_error = false;
+            }
+        }
+        pattern_temp = "";
+        index_result++;
+    }
+
+    private void gestionParenthese(String param_pattern) {
+        String commande = "";
+        position_pattern++;
+        while (param_pattern.charAt(position_pattern) != ')') {
+            commande = commande + param_pattern.charAt(position_pattern);
+            position_pattern++;
+        }
+        switch (commande) {
+            case "int":
+                position_ligne_courante = getInteger(ligne_courante, position_ligne_courante, index_result);
+                break;
+            case "double":
+                position_ligne_courante = getDouble(ligne_courante, position_ligne_courante, index_result);
+                break;
+            case "String":
+                position_ligne_courante = getString(ligne_courante, position_ligne_courante, index_result);
+        }
+        index_result++;
     }
 
     public int getDebut_texte() {
@@ -374,14 +443,4 @@ public class PARSER {
         pattern_unrecognized = false;
     }
 
-    private void SAMCEF_recognizeGroupOfElem(String ligne) {
-        // avancer jusqu'à "I"
-        // ignore spaces
-        // si "I"
-        // recuperer jusqu'à "J" ou fin de ligne
-        // si "J"
-        // recuperer le dernier resultat --> X
-        // recuperer valeur après "J" --> Y
-        // ajouter de X à Y par increment de 1
-    }
 }

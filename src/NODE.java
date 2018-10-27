@@ -1,22 +1,30 @@
-public class NODE {
+import java.util.ArrayList;
 
-    private int node_id;
+public class NODE extends REFERENCE {
+
+    //private int node_id;
     private double[] node_coord;
+    private ArrayList<FACE> attached_faces;
     private boolean highlight;
 
     public NODE(){
-        node_id = 0;
+        this.id = 0;
         node_coord = new double[3];
         highlight = false;
     }
 
     public NODE(int param_id, double[] param_coord, boolean param_highlight){
-        node_id = param_id;
+        this.id = param_id;
         node_coord = param_coord;
         highlight = param_highlight;
+        attached_faces = new ArrayList<>();
     }
 
-    public int getNode_id() {
-        return node_id;
+    public void addAttachedFaces(FACE attached_face) {
+        attached_faces.add(attached_face);
+    }
+
+    public ArrayList<FACE> getAttached_faces() {
+        return attached_faces;
     }
 }
