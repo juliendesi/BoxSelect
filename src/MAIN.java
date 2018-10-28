@@ -3,5 +3,15 @@ public class MAIN {
         MODEL modele = new MODEL();
         modele.importData("/Users/Julien/IdeaProjects/maillage_V11.dat");
 
+        modele.createContact();
+        modele.getContact(0).setType("CYLINDRE STRUCT");
+        modele.getContact(0).setPart1(modele.getPart(3));
+        modele.getContact(0).setPart2(modele.getPart(4));
+        ((CYLIND_STRUCT) modele.getContact(0).getSelection()).setZ_inf(10.2);
+        ((CYLIND_STRUCT) modele.getContact(0).getSelection()).setZ_sup(20.2);
+        ((CYLIND_STRUCT) modele.getContact(0).getSelection()).setCenter(0, 0.0);
+        ((CYLIND_STRUCT) modele.getContact(0).getSelection()).setCenter(1, 0.0);
+        ((CYLIND_STRUCT) modele.getContact(0).getSelection()).setRayon_ext(3.0);
+
     }
 }

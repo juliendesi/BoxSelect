@@ -3,9 +3,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 public class DATA {
     private ArrayList<NODE> nodes_list;
@@ -122,7 +121,7 @@ public class DATA {
 
     private void getPartsFromText(ArrayList<String> recup_fichier) {
         PARSER parser_nom = new PARSER(" GROUP /5 NOM \"(String)\" MAILLE", '$');
-        PARSER parser_node = new PARSER(" I (int) J (int)", '$');
+        PARSER parser_elem = new PARSER(" I (int) J (int)", '$');
 
         // 1 : tester jusqu'à ".SEL"
         while (current_line_index < recup_fichier.size()) {
@@ -152,21 +151,21 @@ public class DATA {
                     if (recup_fichier.get(current_line_index).contains("!") == true) {
                         current_line_index++;
                     } else {
-                        ArrayList<Integer> id_node_list = new ArrayList<>();
+                        ArrayList<Integer> id_elem_list = new ArrayList<>();
                         if (parser_nom.parseFromLine(recup_fichier.get(current_line_index)) > 0) {
                             String name = (String) parser_nom.getResult()[0].get(0);
                             parts_list.add(new PART(name));
                             parser_nom.clearResult();
 
                             current_line_index++;
-                            parser_node.setDebut_texte(current_line_index);
-                            while (parser_node.parseFromText(recup_fichier) > 0) {
-                                id_node_list.addAll(this.analysePartData(parser_node));
-                                parser_node.clearResult();
+                            parser_elem.setDebut_texte(current_line_index);
+                            while (parser_elem.parseFromText(recup_fichier) > 0) {
+                                id_elem_list.addAll(this.analysePartData(parser_elem));
+                                parser_elem.clearResult();
                                 current_line_index++;
-                                parser_node.setDebut_texte(current_line_index);
+                                parser_elem.setDebut_texte(current_line_index);
                             }
-                            this.addPartElemFromNodeId(id_node_list, parts_list.get(parts_list.size() - 1));
+                            this.addPartElemFromNodeId(id_elem_list, parts_list.get(parts_list.size() - 1));
                         } else current_line_index++;
                     }
                 }
@@ -237,45 +236,36 @@ public class DATA {
             return castTabObjectInTabInteger(parser.getResult()[0]);
         } else {
             ArrayList<Integer> id_elem_list;
-            int node_j, last_node_i;
-            node_j = (int) parser.getResult()[1].get(0);
-            last_node_i = (int) parser.getResult()[0].get(parser.getResult()[0].size() - 1);
+            int elem_j, last_elem_i;
+            elem_j = (int) parser.getResult()[1].get(0);
+            last_elem_i = (int) parser.getResult()[0].get(parser.getResult()[0].size() - 1);
             id_elem_list = castTabObjectInTabInteger(parser.getResult()[0]);
-            for (int i = last_node_i + 1; i < node_j + 1; i++) {
+            for (int i = last_elem_i + 1; i < elem_j + 1; i++) {
                 id_elem_list.add(i);
             }
             return id_elem_list;
         }
     }
 
-    private void addPartElemFromNodeId(ArrayList<Integer> id_node_parser, PART part) {
-        int index_first_node = this.searchReferenceFromID(id_node_parser.get(0), nodes_list);
-        ArrayList<NODE> node_list = new ArrayList<>();
-        ArrayList<FACE> face_list = new ArrayList<>();
-        ArrayList<ELEMENT> elem_list = new ArrayList<>();
+    private void addPartElemFromNodeId(ArrayList<Integer> id_elem_parser, PART part) {
+        Collections.sort(elements_list);
+        int index_first_elem = this.searchReferenceFromID(id_elem_parser.get(0), elements_list);
 
-        node_list.add(nodes_list.get(index_first_node));
+        part.addElement(elements_list.get(index_first_elem));
 
-        for (int index_node_parser = 1; index_node_parser < id_node_parser.size(); index_node_parser++)
-            for (int id_node = index_first_node; id_node < nodes_list.size(); id_node++)
-                if (id_node_parser.get(index_node_parser) == nodes_list.get(id_node).getId()) {
-                    node_list.add(nodes_list.get(id_node));
-                    index_first_node = id_node;
+        for (int index_elem_parser = 1; index_elem_parser < id_elem_parser.size(); index_elem_parser++)
+            for (int id_elem = index_first_elem; id_elem < elements_list.size(); id_elem++)
+                if (id_elem_parser.get(index_elem_parser) == elements_list.get(id_elem).getId()) {
+                    part.addElement(elements_list.get(id_elem));
+                    index_first_elem = id_elem;
                     break;
                 }
-        for (NODE node : node_list) {
-            face_list.addAll(node.getAttached_faces());
-        }
-        for (FACE face : face_list) {
-            elem_list.addAll(face.getAttached_elements());
-        }
-        Set set = new HashSet();
-        set.addAll(elem_list);
-        ArrayList<ELEMENT> elem_list_unique = new ArrayList(set);
-        for (ELEMENT elem : elem_list_unique) {
-            part.addElement(elem);
-        }
     }
+
+    public ArrayList<PART> getParts_list() {
+        return parts_list;
+    }
+
 
 
 }

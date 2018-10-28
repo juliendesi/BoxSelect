@@ -27,4 +27,12 @@ public class NODE extends REFERENCE {
     public ArrayList<FACE> getAttached_faces() {
         return attached_faces;
     }
+
+    public double[] getCoord() {
+        return node_coord;
+    }
+
+    public void setHighlight(boolean highlight) {
+        this.highlight = highlight;
+    }
 }

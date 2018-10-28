@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-public class FACE {
+public class FACE extends REFERENCE {
 
     private ArrayList<NODE> nodes_list;
     private ArrayList<ELEMENT> attached_elements;
@@ -9,7 +9,7 @@ public class FACE {
     public FACE(ArrayList<NODE> param_nodes_list){
         nodes_list = param_nodes_list;
         attached_elements = new ArrayList<>();
-        is_interface = false;
+        is_interface = true;
         this.attachToNodes();
     }
 
@@ -25,5 +25,35 @@ public class FACE {
 
     public ArrayList<ELEMENT> getAttached_elements() {
         return attached_elements;
+    }
+
+    public ArrayList<NODE> getNodes_list() {
+        return nodes_list;
+    }
+
+    public boolean contains(NODE node) {
+        for (NODE node_of_face : nodes_list) {
+            if (node_of_face.getId() == node.getId()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean getInterface() {
+        return is_interface;
+    }
+
+    public void setInterface(boolean is_interface) {
+        this.is_interface = is_interface;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this.id == ((FACE) obj).getId();
+    }
+
+    public int getNbNode() {
+        return nodes_list.size();
     }
 }
