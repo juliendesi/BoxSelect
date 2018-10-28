@@ -18,6 +18,7 @@ public class CYLINDRE extends SELECTION {
         center_sup = new double[3];
         for (int i = 0; i < 3; i++) {
             center_inf[i] = 0.0;
+            center_sup[i] = 0.0;
         }
         tolerance = 0.005;
         this.setOrientation();
@@ -74,16 +75,16 @@ public class CYLINDRE extends SELECTION {
 
         Set set = new HashSet();
         double[] coord;
-        for (int i = 0; i < faces_to_treat.size(); i++) {
-            set.addAll(faces_to_treat.get(i).getNodes_list());
+        for (FACE aFaces_to_treat : faces_to_treat) {
+            set.addAll(aFaces_to_treat.getNodes_list());
         }
         ArrayList<NODE> list_node = new ArrayList<>(set);
-        for (int i = 0; i < list_node.size(); i++) {
-            coord = this.inLocalFrame(list_node.get(i).getCoord());
+        for (NODE aList_node : list_node) {
+            coord = this.inLocalFrame(aList_node.getCoord());
             if (isInCylinder(coord)) {
-                list_node.get(i).setHighlight(true);
-                nodes_list.add(list_node.get(i));
-            } else list_node.get(i).setHighlight(false);
+                aList_node.setHighlight(true);
+                nodes_list.add(aList_node);
+            } else aList_node.setHighlight(false);
         }
     }
 
@@ -107,7 +108,7 @@ public class CYLINDRE extends SELECTION {
         }
     }
 
-    protected double[] inLocalFrame(double[] coord_globale) {
+    private double[] inLocalFrame(double[] coord_globale) {
         double[] coord_locale = new double[3];
         double[] coord_glob_centered = new double[3];
         for (int i = 0; i < 3; i++) {
@@ -122,7 +123,7 @@ public class CYLINDRE extends SELECTION {
         return coord_locale;
     }
 
-    protected boolean isInCylinder(double[] coord_locale) {
+    private boolean isInCylinder(double[] coord_locale) {
         double[] local_center_sup;
         double distance_2;
         local_center_sup = this.inLocalFrame(center_sup);

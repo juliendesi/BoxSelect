@@ -7,12 +7,6 @@ public class NODE extends REFERENCE {
     private ArrayList<FACE> attached_faces;
     private boolean highlight;
 
-    public NODE(){
-        this.id = 0;
-        node_coord = new double[3];
-        highlight = false;
-    }
-
     public NODE(int param_id, double[] param_coord, boolean param_highlight){
         this.id = param_id;
         node_coord = param_coord;
