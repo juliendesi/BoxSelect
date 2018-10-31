@@ -5,11 +5,17 @@ public class PART {
     private String part_name;
     private ArrayList<ELEMENT> elements_list;
     private ArrayList<FACE> face_exterieur;
+    private long time_face_manquante;
+    private long time_detect_interface;
 
     public PART(String param_name) {
         part_name = param_name;
         elements_list = new ArrayList<>();
         face_exterieur = new ArrayList<>();
+    }
+
+    public String getPart_name() {
+        return part_name;
     }
 
     public void addElement(ELEMENT param_elem) {
@@ -57,9 +63,11 @@ public class PART {
             elements_list.get(i).setType();
             elements_list.get(i).construireFaceManquante();
         }
+        time_face_manquante = System.currentTimeMillis() - time;
+        System.out.println("Face manquante : " + time_face_manquante);
         this.numberingFaces();
         this.detectInterfaceFromFaces();
-        System.out.println("Finalisation de " + part_name + " : " + (System.currentTimeMillis() - time) + "ms");
+        System.out.println("Finalisation de " + part_name + " : " + (System.currentTimeMillis() - time_face_manquante - time) + "ms");
     }
 
     public ArrayList<FACE> getFace_exterieur() {

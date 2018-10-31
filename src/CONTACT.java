@@ -2,6 +2,7 @@ import java.util.ArrayList;
 
 public class CONTACT {
 
+    private String name;
     private SELECTION selection;
     private PART part1;
     private PART part2;
