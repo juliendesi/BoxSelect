@@ -42,8 +42,9 @@ public class MODEL {
         }
     }
 
-    public void createContact() {
+    public int createContact() {
         contacts_list.add(new CONTACT());
+        return contacts_list.size() - 1;
     }
 
     public CONTACT getContact(int id_contact) {

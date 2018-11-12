@@ -1,28 +1,34 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.*;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Locale;
 
 public class DialogContact extends JDialog {
 
-    private boolean sendData;
-    private JPanel content;
+    String name;
+    JFormattedTextField X_centerStruct, Y_centerStruct, ZinfStruct, ZsupStruct, RintStruct, RextStruct;
+    JLabel xLabelStruct, yLabelStruct, zinfLabelStruct, zsupLabelStruct, rintLabelStruct, rextLabelStruct;
+    JFormattedTextField X_infCpoint, Y_infCpoint, Z_infCpoint, X_supCpoint, Y_supCpoint, Z_supCpoint, RintCpoint, RextCpoint;
+    JLabel X_infLabelCpoint, Y_infLabelCpoint, Z_infLabelCpoint, X_supLabelCpoint, Y_supLabelCpoint, Z_supLabelCpoint, rintLabelCpoint, rextLabelCpoint;
+    private boolean ok_pressed;
+    private JPanel content, panStructParameter, panCpointParameter;
     private JLabel nomLabel, part1Label, part2Label, typeBoiteLabel;
     private JComboBox part1, part2, typeBoite;
     private JTextField nom;
     private ArrayList<String> list_parts_name;
     private CONTROLLER controller;
+    private int idContact;
 
-    public DialogContact(JFrame parent, String title, boolean modal, ArrayList<String> list_parts_name, CONTROLLER controller) {
+    public DialogContact(JFrame parent, String title, boolean modal, ArrayList<String> list_parts_name, CONTROLLER controller, int idContact) {
         super(parent, title, modal);
+        this.ok_pressed = false;
         this.controller = controller;
+        this.idContact = idContact;
         this.list_parts_name = list_parts_name;
-        this.setSize(550, 400);
+        this.setSize(550, 340);
         this.setLocationRelativeTo(null);
         this.setResizable(false);
         this.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
@@ -91,8 +97,97 @@ public class DialogContact extends JDialog {
         panTypeBoite.add(typeBoite);
 
         // Boite cylindre struct
+        panStructParameter = new JPanel();
+        panStructParameter.setLayout(new GridLayout(3, 2));
+        panStructParameter.setBackground(Color.white);
+        panStructParameter.setPreferredSize(new Dimension(440, 100));
+        panStructParameter.setBorder(BorderFactory.createTitledBorder("Parameters"));
 
+        X_centerStruct = new JFormattedTextField(NumberFormat.getNumberInstance(Locale.US));
+        X_centerStruct.setPreferredSize(new Dimension(90, 25));
+        Y_centerStruct = new JFormattedTextField(NumberFormat.getNumberInstance(Locale.US));
+        Y_centerStruct.setPreferredSize(new Dimension(90, 25));
+        ZinfStruct = new JFormattedTextField(NumberFormat.getNumberInstance(Locale.US));
+        ZinfStruct.setPreferredSize(new Dimension(90, 25));
+        ZsupStruct = new JFormattedTextField(NumberFormat.getNumberInstance(Locale.US));
+        ZsupStruct.setPreferredSize(new Dimension(90, 25));
+        RintStruct = new JFormattedTextField(NumberFormat.getNumberInstance(Locale.US));
+        RintStruct.setPreferredSize(new Dimension(90, 25));
+        RextStruct = new JFormattedTextField(NumberFormat.getNumberInstance(Locale.US));
+        RextStruct.setPreferredSize(new Dimension(90, 25));
 
+        xLabelStruct = new JLabel("X : ");
+        yLabelStruct = new JLabel("Y : ");
+        zinfLabelStruct = new JLabel("Zinf : ");
+        zsupLabelStruct = new JLabel("Zsup : ");
+        rintLabelStruct = new JLabel("Rayon int : ");
+        rextLabelStruct = new JLabel("Rayon ext : ");
+
+        panStructParameter.add(xLabelStruct);
+        panStructParameter.add(X_centerStruct);
+        panStructParameter.add(yLabelStruct);
+        panStructParameter.add(Y_centerStruct);
+        panStructParameter.add(zinfLabelStruct);
+        panStructParameter.add(ZinfStruct);
+        panStructParameter.add(zsupLabelStruct);
+        panStructParameter.add(ZsupStruct);
+        panStructParameter.add(rintLabelStruct);
+        panStructParameter.add(RintStruct);
+        panStructParameter.add(rextLabelStruct);
+        panStructParameter.add(RextStruct);
+        panStructParameter.setVisible(false);
+
+        // Boite cylindre Cpoint
+        panCpointParameter = new JPanel();
+        panCpointParameter.setLayout(new GridLayout(3, 3));
+        panCpointParameter.setBackground(Color.white);
+        panCpointParameter.setPreferredSize(new Dimension(440, 100));
+        panCpointParameter.setBorder(BorderFactory.createTitledBorder("Parameters"));
+
+        X_infCpoint = new JFormattedTextField(NumberFormat.getNumberInstance(Locale.US));
+        X_infCpoint.setPreferredSize(new Dimension(90, 25));
+        Y_infCpoint = new JFormattedTextField(NumberFormat.getNumberInstance(Locale.US));
+        Y_infCpoint.setPreferredSize(new Dimension(90, 25));
+        Z_infCpoint = new JFormattedTextField(NumberFormat.getNumberInstance(Locale.US));
+        Z_infCpoint.setPreferredSize(new Dimension(90, 25));
+        X_supCpoint = new JFormattedTextField(NumberFormat.getNumberInstance(Locale.US));
+        X_supCpoint.setPreferredSize(new Dimension(90, 25));
+        Y_supCpoint = new JFormattedTextField(NumberFormat.getNumberInstance(Locale.US));
+        Y_supCpoint.setPreferredSize(new Dimension(90, 25));
+        Z_supCpoint = new JFormattedTextField(NumberFormat.getNumberInstance(Locale.US));
+        Z_supCpoint.setPreferredSize(new Dimension(90, 25));
+        RintCpoint = new JFormattedTextField(NumberFormat.getNumberInstance(Locale.US));
+        RintCpoint.setPreferredSize(new Dimension(90, 25));
+        RextCpoint = new JFormattedTextField(NumberFormat.getNumberInstance(Locale.US));
+        RextCpoint.setPreferredSize(new Dimension(90, 25));
+
+        X_infLabelCpoint = new JLabel("X inf : ");
+        Y_infLabelCpoint = new JLabel("Y inf : ");
+        Z_infLabelCpoint = new JLabel("Z inf : ");
+        X_supLabelCpoint = new JLabel("X sup : ");
+        Y_supLabelCpoint = new JLabel("Y sup : ");
+        Z_supLabelCpoint = new JLabel("Z sup : ");
+        rintLabelCpoint = new JLabel("Rayon int : ");
+        rextLabelCpoint = new JLabel("Rayon ext : ");
+
+        panCpointParameter.add(X_infLabelCpoint);
+        panCpointParameter.add(X_infCpoint);
+        panCpointParameter.add(Y_infLabelCpoint);
+        panCpointParameter.add(Y_infCpoint);
+        panCpointParameter.add(Z_infLabelCpoint);
+        panCpointParameter.add(Z_infCpoint);
+        panCpointParameter.add(X_supLabelCpoint);
+        panCpointParameter.add(X_supCpoint);
+        panCpointParameter.add(Y_supLabelCpoint);
+        panCpointParameter.add(Y_supCpoint);
+        panCpointParameter.add(Z_supLabelCpoint);
+        panCpointParameter.add(Z_supCpoint);
+        panCpointParameter.add(rintLabelCpoint);
+        panCpointParameter.add(RintCpoint);
+        panCpointParameter.add(rextLabelCpoint);
+        panCpointParameter.add(RextCpoint);
+        panCpointParameter.setVisible(false);
+        
         // Ajout dans le contenu
         content = new JPanel();
         content.setBackground(Color.white);
@@ -100,35 +195,136 @@ public class DialogContact extends JDialog {
         content.add(panPart1);
         content.add(panPart2);
         content.add(panTypeBoite);
+        content.add(panStructParameter);
+        content.add(panCpointParameter);
         //content.add(panTaille);
         //content.add(panCheveux);
 
         JPanel control = new JPanel();
 
         JButton okBouton = new JButton("OK");
-        /*okBouton.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent arg0) {
-                zInfo = new ZDialogInfo(nom.getText(), (String)sexe.getSelectedItem(), getAge(), (String)cheveux.getSelectedItem() ,getTaille());
-                setVisible(false);
-            }
-
-
-            public String getTaille(){
-                return (taille.getText().equals("")) ? "180" : taille.getText();
-            }
-        });*/
+        okBouton.addActionListener(new OKListener());
 
         JButton cancelBouton = new JButton("Annuler");
         cancelBouton.addActionListener(new CancelListener());
 
+        part1.addItemListener(new ItemState());
+        part1.addActionListener(new Part1Listener());
+
+        part2.addItemListener(new ItemState());
+        part2.addActionListener(new Part2Listener());
+
         typeBoite.addItemListener(new ItemState());
         typeBoite.addActionListener(new TypeBoiteListener());
+
+        X_centerStruct.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
+        X_centerStruct.addKeyListener(new StructParameterListener());
+        X_centerStruct.addMouseListener(new StructParameterListener());
+
+        Y_centerStruct.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
+        Y_centerStruct.addKeyListener(new StructParameterListener());
+        Y_centerStruct.addMouseListener(new StructParameterListener());
+
+        ZinfStruct.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
+        ZinfStruct.addKeyListener(new StructParameterListener());
+        ZinfStruct.addMouseListener(new StructParameterListener());
+
+        ZsupStruct.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
+        ZsupStruct.addKeyListener(new StructParameterListener());
+        ZsupStruct.addMouseListener(new StructParameterListener());
+
+        RintStruct.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
+        RintStruct.addKeyListener(new StructParameterListener());
+        RintStruct.addMouseListener(new StructParameterListener());
+
+        RextStruct.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
+        RextStruct.addKeyListener(new StructParameterListener());
+        RextStruct.addMouseListener(new StructParameterListener());
+
+
+        X_infCpoint.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
+        X_infCpoint.addKeyListener(new CpointParameterListener());
+        X_infCpoint.addMouseListener(new CpointParameterListener());
+
+        Y_infCpoint.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
+        Y_infCpoint.addKeyListener(new CpointParameterListener());
+        Y_infCpoint.addMouseListener(new CpointParameterListener());
+
+        Z_infCpoint.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
+        Z_infCpoint.addKeyListener(new CpointParameterListener());
+        Z_infCpoint.addMouseListener(new CpointParameterListener());
+
+        X_supCpoint.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
+        X_supCpoint.addKeyListener(new CpointParameterListener());
+        X_supCpoint.addMouseListener(new CpointParameterListener());
+
+        Y_supCpoint.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
+        Y_supCpoint.addKeyListener(new CpointParameterListener());
+        Y_supCpoint.addMouseListener(new CpointParameterListener());
+
+        Z_supCpoint.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
+        Z_supCpoint.addKeyListener(new CpointParameterListener());
+        Z_supCpoint.addMouseListener(new CpointParameterListener());
+
+        RintCpoint.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
+        RintCpoint.addKeyListener(new CpointParameterListener());
+        RintCpoint.addMouseListener(new CpointParameterListener());
+
+        RextCpoint.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
+        RextCpoint.addKeyListener(new CpointParameterListener());
+        RextCpoint.addMouseListener(new CpointParameterListener());
 
         control.add(okBouton);
         control.add(cancelBouton);
 
         this.getContentPane().add(content, BorderLayout.CENTER);
         this.getContentPane().add(control, BorderLayout.SOUTH);
+    }
+
+    public ArrayList<Double> getCylindreStructValues() {
+        ArrayList<Double> list_parameters = new ArrayList<>();
+        list_parameters.add((double) X_centerStruct.getValue());
+        list_parameters.add((double) Y_centerStruct.getValue());
+        list_parameters.add((double) ZinfStruct.getValue());
+        list_parameters.add((double) ZsupStruct.getValue());
+        list_parameters.add((double) RintStruct.getValue());
+        list_parameters.add((double) RextStruct.getValue());
+        return list_parameters;
+    }
+
+    public ArrayList<Double> getCylindreCpointValues() {
+        ArrayList<Double> list_parameters = new ArrayList<>();
+        list_parameters.add((double) X_infCpoint.getValue());
+        list_parameters.add((double) Y_infCpoint.getValue());
+        list_parameters.add((double) Z_infCpoint.getValue());
+        list_parameters.add((double) X_supCpoint.getValue());
+        list_parameters.add((double) Y_supCpoint.getValue());
+        list_parameters.add((double) Z_supCpoint.getValue());
+        list_parameters.add((double) RintCpoint.getValue());
+        list_parameters.add((double) RextCpoint.getValue());
+        return list_parameters;
+    }
+
+    public boolean getOK() {
+        return this.ok_pressed;
+    }
+
+    public String getLastName() {
+        return this.name;
+    }
+
+    public class Part1Listener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            controller.setPart1(idContact, part1.getSelectedIndex());
+        }
+    }
+
+    public class Part2Listener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            controller.setPart2(idContact, part2.getSelectedIndex());
+        }
     }
 
     public class ItemState implements ItemListener {
@@ -140,67 +336,146 @@ public class DialogContact extends JDialog {
     public class TypeBoiteListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            System.out.println(typeBoite.getSelectedItem());
+            ArrayList<Double> initial_value;
             switch (typeBoite.getSelectedItem().toString()) {
                 case "CYLINDRE STRUCT":
+                    controller.setType(idContact, typeBoite.getSelectedItem().toString());
                     DialogContact.this.setSize(550, 500);
-                    JFormattedTextField X_center, Y_center, Zinf, Zsup, Rint, Rext;
-                    JLabel xLabel, yLabel, zinfLabel, zsupLabel, rintLabel, rextLabel;
-
-                    JPanel panParameter = new JPanel();
-                    panParameter.setLayout(new GridLayout(3, 2));
-                    panParameter.setBackground(Color.white);
-                    panParameter.setPreferredSize(new Dimension(440, 150));
-                    panParameter.setBorder(BorderFactory.createTitledBorder("Parameters"));
-
-                    X_center = new JFormattedTextField(NumberFormat.getNumberInstance(Locale.US));
-                    X_center.setPreferredSize(new Dimension(90, 25));
-                    Y_center = new JFormattedTextField(NumberFormat.getNumberInstance(Locale.US));
-                    Y_center.setPreferredSize(new Dimension(90, 25));
-                    Zinf = new JFormattedTextField(NumberFormat.getNumberInstance(Locale.US));
-                    Zinf.setPreferredSize(new Dimension(90, 25));
-                    Zsup = new JFormattedTextField(NumberFormat.getNumberInstance(Locale.US));
-                    Zsup.setPreferredSize(new Dimension(90, 25));
-                    Rint = new JFormattedTextField(NumberFormat.getNumberInstance(Locale.US));
-                    Rint.setPreferredSize(new Dimension(90, 25));
-                    Rext = new JFormattedTextField(NumberFormat.getNumberInstance(Locale.US));
-                    Rext.setPreferredSize(new Dimension(90, 25));
-
-
-                    xLabel = new JLabel("X : ");
-                    yLabel = new JLabel("Y : ");
-                    zinfLabel = new JLabel("Zinf : ");
-                    zsupLabel = new JLabel("Zsup : ");
-                    rintLabel = new JLabel("Rayon int : ");
-                    rextLabel = new JLabel("Rayon ext : ");
-
-                    panParameter.add(xLabel);
-                    panParameter.add(X_center);
-                    panParameter.add(yLabel);
-                    panParameter.add(Y_center);
-                    panParameter.add(zinfLabel);
-                    panParameter.add(Zinf);
-                    panParameter.add(zsupLabel);
-                    panParameter.add(Zsup);
-                    panParameter.add(rintLabel);
-                    panParameter.add(Rint);
-                    panParameter.add(rextLabel);
-                    panParameter.add(Rext);
-
-                    content.add(panParameter);
-                    DialogContact.this.getContentPane().revalidate();
+                    panCpointParameter.setVisible(false);
+                    panStructParameter.setVisible(true);
+                    initial_value = controller.getBoxInitialParameters(idContact);
+                    X_centerStruct.setValue(initial_value.get(0));
+                    Y_centerStruct.setValue(initial_value.get(1));
+                    ZinfStruct.setValue(initial_value.get(2));
+                    ZsupStruct.setValue(initial_value.get(3));
+                    RintStruct.setValue(initial_value.get(4));
+                    RextStruct.setValue(initial_value.get(5));
                     break;
-                case "CYLINDRE CPOINT":
 
+                case "CYLINDRE CPOINT":
+                    controller.setType(idContact, typeBoite.getSelectedItem().toString());
+                    DialogContact.this.setSize(550, 500);
+                    panStructParameter.setVisible(false);
+                    panCpointParameter.setVisible(true);
+                    initial_value = controller.getBoxInitialParameters(idContact);
+                    X_infCpoint.setValue(initial_value.get(0));
+                    Y_infCpoint.setValue(initial_value.get(1));
+                    Z_infCpoint.setValue(initial_value.get(2));
+                    X_supCpoint.setValue(initial_value.get(3));
+                    Y_supCpoint.setValue(initial_value.get(4));
+                    Z_supCpoint.setValue(initial_value.get(5));
+                    RintCpoint.setValue(initial_value.get(6));
+                    RextCpoint.setValue(initial_value.get(7));
+
+                    break;
+
+                case "":
+                    DialogContact.this.setSize(550, 340);
+                    panStructParameter.setVisible(false);
+                    panCpointParameter.setVisible(false);
                     break;
             }
+        }
+    }
+
+    public class OKListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            ok_pressed = true;
+            name = nom.getText();
+            DialogContact.this.setVisible(false);
         }
     }
 
     public class CancelListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
+            controller.removeContact(idContact);
             DialogContact.this.setVisible(false);
         }
     }
+
+    public class StructParameterListener implements MouseListener, KeyListener {
+
+        @Override
+        public void keyTyped(KeyEvent e) {
+        }
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+            if (e.getKeyCode() == KeyEvent.VK_TAB || e.getKeyCode() == KeyEvent.VK_ENTER) {
+                // on récupère toutes les valeurs des champs et on les envoie au controller
+                controller.setParameters(idContact, DialogContact.this.getCylindreStructValues());
+            }
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            // on récupère toutes les valeurs des champs et on les envoie au controller
+            controller.setParameters(idContact, DialogContact.this.getCylindreStructValues());
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+        }
+    }
+
+    public class CpointParameterListener implements MouseListener, KeyListener {
+
+        @Override
+        public void keyTyped(KeyEvent e) {
+        }
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+            if (e.getKeyCode() == KeyEvent.VK_TAB || e.getKeyCode() == KeyEvent.VK_ENTER) {
+                // on récupère toutes les valeurs des champs et on les envoie au controller
+                controller.setParameters(idContact, DialogContact.this.getCylindreCpointValues());
+            }
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            // on récupère toutes les valeurs des champs et on les envoie au controller
+            controller.setParameters(idContact, DialogContact.this.getCylindreCpointValues());
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+        }
+    }
+
+
 }

@@ -25,7 +25,6 @@ public class CYLIND_STRUCT extends CYLINDRE {
         this.center_inf[composante] = value;
         this.center_sup[composante] = value;
         this.setOrientation();
-        this.updateIntersection();
     }
 
     public double getCenter(int composante) {
@@ -40,7 +39,6 @@ public class CYLIND_STRUCT extends CYLINDRE {
         this.z_inf = z_inf;
         this.center_inf[2] = z_inf;
         this.setOrientation();
-        this.updateIntersection();
     }
 
     public double getZ_sup() {
@@ -51,6 +49,5 @@ public class CYLIND_STRUCT extends CYLINDRE {
         this.z_sup = z_sup;
         this.center_sup[2] = z_sup;
         this.setOrientation();
-        this.updateIntersection();
     }
 }

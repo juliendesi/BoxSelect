@@ -26,8 +26,32 @@ public class CONTROLLER {
         return this.model.getParts_list_name();
     }
 
-    public void createContact() {
-        this.model.createContact();
+    public int createContact() {
+        return this.model.createContact();
+    }
+
+    public void removeContact(int idContact) {
+        this.model.removeContact(idContact);
+    }
+
+    public void setPart1(int idContact, int indexPart1) {
+        this.model.getContact(idContact).setPart1(this.model.getPart(indexPart1));
+    }
+
+    public void setPart2(int idContact, int indexPart2) {
+        this.model.getContact(idContact).setPart2(this.model.getPart(indexPart2));
+    }
+
+    public void setType(int idContact, String type) {
+        this.model.getContact(idContact).setType(type);
+    }
+
+    public ArrayList<Double> getBoxInitialParameters(int idContact) {
+        return this.model.getContact(idContact).getParameters();
+    }
+
+    public void setParameters(int idContact, ArrayList<Double> list_parameters) {
+        this.model.getContact(idContact).setParameters(list_parameters);
     }
 
 

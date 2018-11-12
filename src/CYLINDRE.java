@@ -28,13 +28,11 @@ public class CYLINDRE extends SELECTION {
     public void setCenter_inf(int composante, double value) {
         this.center_inf[composante] = value;
         this.setOrientation();
-        this.updateIntersection();
     }
 
     public void setCenter_sup(int composante, double value) {
         this.center_sup[composante] = value;
         this.setOrientation();
-        this.updateIntersection();
     }
 
     public double getCenter_inf(int composante) {
@@ -51,7 +49,6 @@ public class CYLINDRE extends SELECTION {
 
     public void setRayon_ext(double rayon_ext) {
         this.rayon_ext = rayon_ext;
-        this.updateIntersection();
     }
 
     public double getRayon_int() {
@@ -60,10 +57,9 @@ public class CYLINDRE extends SELECTION {
 
     public void setRayon_int(double rayon_int) {
         this.rayon_int = rayon_int;
-        this.updateIntersection();
     }
 
-    protected void updateIntersection() {
+    public void updateIntersection() {
         if (faces_to_treat != null) {
             this.computeIntersection();
         }
