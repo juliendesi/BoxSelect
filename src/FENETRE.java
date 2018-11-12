@@ -1,3 +1,7 @@
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.Scene;
+
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -25,7 +29,7 @@ public class FENETRE extends JFrame {
         this.setLayout(new BorderLayout());
 
         //Instanciation d'un objet JPanel
-        JPanel graphique = new JPanel();
+        final JFXPanel graphique = new JFXPanel();
 
         JPanel menu = new JPanel();
         add_contact_button = new JButton("Add contact");
@@ -44,6 +48,20 @@ public class FENETRE extends JFrame {
         add_contact_button.addActionListener(new AddContactListener());
 
         this.setVisible(true);
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                initFX(graphique);
+            }
+        });
+    }
+
+    private static void initFX(JFXPanel fxPanel) {
+        // This method is invoked on the JavaFX thread
+        InterfaceVue test = new InterfaceVue();
+        Scene scene = test.createScene();
+        fxPanel.setScene(scene);
     }
 
     private void buildTree() {
