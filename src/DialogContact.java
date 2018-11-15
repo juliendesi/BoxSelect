@@ -283,25 +283,25 @@ public class DialogContact extends JDialog {
 
     public ArrayList<Double> getCylindreStructValues() {
         ArrayList<Double> list_parameters = new ArrayList<>();
-        list_parameters.add((double) X_centerStruct.getValue());
-        list_parameters.add((double) Y_centerStruct.getValue());
-        list_parameters.add((double) ZinfStruct.getValue());
-        list_parameters.add((double) ZsupStruct.getValue());
-        list_parameters.add((double) RintStruct.getValue());
-        list_parameters.add((double) RextStruct.getValue());
+        list_parameters.add(((Number) X_centerStruct.getValue()).doubleValue());
+        list_parameters.add(((Number) Y_centerStruct.getValue()).doubleValue());
+        list_parameters.add(((Number) ZinfStruct.getValue()).doubleValue());
+        list_parameters.add(((Number) ZsupStruct.getValue()).doubleValue());
+        list_parameters.add(((Number) RintStruct.getValue()).doubleValue());
+        list_parameters.add(((Number) RextStruct.getValue()).doubleValue());
         return list_parameters;
     }
 
     public ArrayList<Double> getCylindreCpointValues() {
         ArrayList<Double> list_parameters = new ArrayList<>();
-        list_parameters.add((double) X_infCpoint.getValue());
-        list_parameters.add((double) Y_infCpoint.getValue());
-        list_parameters.add((double) Z_infCpoint.getValue());
-        list_parameters.add((double) X_supCpoint.getValue());
-        list_parameters.add((double) Y_supCpoint.getValue());
-        list_parameters.add((double) Z_supCpoint.getValue());
-        list_parameters.add((double) RintCpoint.getValue());
-        list_parameters.add((double) RextCpoint.getValue());
+        list_parameters.add(((Number) X_infCpoint.getValue()).doubleValue());
+        list_parameters.add(((Number) Y_infCpoint.getValue()).doubleValue());
+        list_parameters.add(((Number) Z_infCpoint.getValue()).doubleValue());
+        list_parameters.add(((Number) X_supCpoint.getValue()).doubleValue());
+        list_parameters.add(((Number) Y_supCpoint.getValue()).doubleValue());
+        list_parameters.add(((Number) Z_supCpoint.getValue()).doubleValue());
+        list_parameters.add(((Number) RintCpoint.getValue()).doubleValue());
+        list_parameters.add(((Number) RextCpoint.getValue()).doubleValue());
         return list_parameters;
     }
 

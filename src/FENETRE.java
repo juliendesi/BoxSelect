@@ -1,6 +1,5 @@
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
-import javafx.scene.Scene;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -12,6 +11,8 @@ import java.util.ArrayList;
 
 public class FENETRE extends JFrame {
     private CONTROLLER controller;
+    private GraphicTreatment moduleGraphic;
+    private InterfaceVue vue;
     private JTree tree;
     private DefaultTreeModel tree_model;
     private DefaultMutableTreeNode racine;
@@ -29,6 +30,7 @@ public class FENETRE extends JFrame {
         this.setLayout(new BorderLayout());
 
         //Instanciation d'un objet JPanel
+        JPanel contenu_graphique = new JPanel();
         final JFXPanel graphique = new JFXPanel();
 
         JPanel menu = new JPanel();
@@ -39,9 +41,10 @@ public class FENETRE extends JFrame {
 
         //Définition de sa couleur de fond
         graphique.setBackground(Color.BLACK);
+        contenu_graphique.add(graphique);
 
         this.getContentPane().add(menu, BorderLayout.NORTH);
-        this.getContentPane().add(graphique, BorderLayout.CENTER);
+        this.getContentPane().add(contenu_graphique, BorderLayout.CENTER);
         this.buildTree();
 
         import_button.addActionListener(new AddImportListener());
@@ -57,11 +60,12 @@ public class FENETRE extends JFrame {
         });
     }
 
-    private static void initFX(JFXPanel fxPanel) {
+    private void initFX(JFXPanel fxPanel) {
         // This method is invoked on the JavaFX thread
-        InterfaceVue test = new InterfaceVue();
-        Scene scene = test.createScene();
-        fxPanel.setScene(scene);
+        vue = new InterfaceVue();
+        vue.createEmptyScene(900, 700);
+        //vue.addPyramid();
+        fxPanel.setScene(vue.getScene());
     }
 
     private void buildTree() {
@@ -132,6 +136,15 @@ public class FENETRE extends JFrame {
             // récupération du fichier sélectionné
             System.out.println("Fichier choisi : " + dialogue.getSelectedFile().getAbsolutePath());
             controller.importData(dialogue.getSelectedFile().getAbsolutePath());
+            moduleGraphic = controller.setGraphicTreatment();
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    vue.addPart(moduleGraphic.getIndicesFacesByPart(0), moduleGraphic.getVerticesCoordByPart(0));
+                    System.out.println("Piece affichée");
+                }
+            });
+
             name_list = controller.getPartsListName();
             for (String name : name_list) {
                 FENETRE.this.addPartToTree(name);

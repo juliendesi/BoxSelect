@@ -2,6 +2,7 @@ import java.util.ArrayList;
 
 public class MODEL {
     private DATA data;
+    private GraphicTreatment graphicTreatment;
     private ArrayList<String> parts_list_name;
     private ArrayList<PART> parts_list;
     private ArrayList<CONTACT> contacts_list;
@@ -30,6 +31,10 @@ public class MODEL {
 
     public PART getPart(int id_part) {
         return parts_list.get(id_part);
+    }
+
+    public int numberOfParts() {
+        return parts_list.size();
     }
 
     public ArrayList<String> getParts_list_name() {

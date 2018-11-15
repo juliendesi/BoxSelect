@@ -64,10 +64,10 @@ public class PART {
             elements_list.get(i).construireFaceManquante();
         }
         time_face_manquante = System.currentTimeMillis() - time;
-        System.out.println("Face manquante : " + time_face_manquante);
+        //System.out.println("Face manquante : " + time_face_manquante);
         this.numberingFaces();
         this.detectInterfaceFromFaces();
-        System.out.println("Finalisation de " + part_name + " : " + (System.currentTimeMillis() - time_face_manquante - time) + "ms");
+        //System.out.println("Finalisation de " + part_name + " : " + (System.currentTimeMillis() - time_face_manquante - time) + "ms");
     }
 
     public ArrayList<FACE> getFace_exterieur() {

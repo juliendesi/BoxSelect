@@ -54,5 +54,10 @@ public class CONTROLLER {
         this.model.getContact(idContact).setParameters(list_parameters);
     }
 
+    public GraphicTreatment setGraphicTreatment() {
+        GraphicTreatment modelGraphic = new GraphicTreatment(model);
+        return modelGraphic;
+    }
+
 
 }

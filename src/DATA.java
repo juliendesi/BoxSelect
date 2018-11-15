@@ -29,7 +29,7 @@ public class DATA {
 
         time = System.currentTimeMillis();
         this.getPartsFromText(recup_fichier);
-        System.out.println("Récupération des éléments : " + (System.currentTimeMillis() - time) + "ms");
+        System.out.println("Récupération des pièces : " + (System.currentTimeMillis() - time) + "ms");
     }
 
     private ArrayList<String> getStringFromFile(String adresse_fichier) {
@@ -57,7 +57,6 @@ public class DATA {
     private void getNodesFromText(ArrayList<String> recup_fichier) {
         int node_id;
         double[] node_coord = new double[3];
-
 
         PARSER parser = new PARSER(" I (int) X (double) Y (double) Z (double)", '$');
 
@@ -147,7 +146,7 @@ public class DATA {
             if (recup_fichier.get(current_line_index).contains("MAILLE") == true) {
                 // 3.1.1 : si ok
                 // 3.1.1.1 : on recupère le nom de la piece
-                while (recup_fichier.get(current_line_index).contains(".") == false && recup_fichier.get(current_line_index).contains("RETURN CLOSE") == false && current_line_index < recup_fichier.size()) {
+                while (recup_fichier.get(current_line_index).contains(".") == false && recup_fichier.get(current_line_index).contains("RETURN CLOSE") == false && recup_fichier.get(current_line_index).contains("EXIT") == false && current_line_index < recup_fichier.size()) {
                     if (recup_fichier.get(current_line_index).contains("!") == true) {
                         current_line_index++;
                     } else {
@@ -265,7 +264,5 @@ public class DATA {
     public ArrayList<PART> getParts_list() {
         return parts_list;
     }
-
-
 
 }
