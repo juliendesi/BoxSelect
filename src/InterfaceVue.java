@@ -4,7 +4,10 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.*;
+import javafx.scene.shape.Box;
+import javafx.scene.shape.DrawMode;
+import javafx.scene.shape.MeshView;
+import javafx.scene.shape.TriangleMesh;
 
 public class InterfaceVue {
 
@@ -25,7 +28,7 @@ public class InterfaceVue {
     final Group root = new Group();
     final Xform axisGroup = new Xform();
     //final ParallelCamera camera = new ParallelCamera();
-    final PerspectiveCamera camera = new PerspectiveCamera();
+    final PerspectiveCamera camera = new PerspectiveCamera(true);
     final Xform world = new Xform();
     private Scene scene;
     final Xform cameraXform = new Xform();
@@ -46,7 +49,12 @@ public class InterfaceVue {
 
         camera.setNearClip(CAMERA_NEAR_CLIP);
         camera.setFarClip(CAMERA_FAR_CLIP);
-        cameraXform.setTranslate(-largeur / 2, -hauteur / 2, -300);
+
+        camera.setTranslateZ(CAMERA_INITIAL_DISTANCE);
+        //cameraXform.ry.setAngle(CAMERA_INITIAL_Y_ANGLE);
+        //cameraXform.rx.setAngle(CAMERA_INITIAL_X_ANGLE);
+
+        //cameraXform.setTranslate(-largeur / 2, -hauteur / 2, -300);
     }
 
     private void buildAxes() {
@@ -141,44 +149,6 @@ public class InterfaceVue {
         });
     }
 
-    public void createTria() {
-        final PhongMaterial redMaterial = new PhongMaterial();
-        redMaterial.setDiffuseColor(Color.DARKRED);
-        redMaterial.setSpecularColor(Color.RED);
-
-        TriangleMesh pyramidMesh = new TriangleMesh();
-        pyramidMesh.getTexCoords().addAll(0, 0);
-        float h = 150;                    // Height
-        float s = 300;                    // Side
-        pyramidMesh.getPoints().addAll(
-                0, 0, 0,            // Point 0 - Top
-                0, h, -s / 2,         // Point 1 - Front
-                -s / 2, h, 0,            // Point 2 - Left
-                s / 2, h, 0,            // Point 3 - Back
-                0, h, s / 2           // Point 4 - Right
-        );
-        pyramidMesh.getFaces().addAll(
-                0, 0, 2, 0, 1, 0,          // Front left face
-                0, 0, 1, 0, 3, 0,          // Front right face
-                0, 0, 3, 0, 4, 0,          // Back right face
-                0, 0, 4, 0, 2, 0,          // Back left face
-                4, 0, 1, 0, 2, 0,          // Bottom rear face
-                4, 0, 3, 0, 1, 0           // Bottom front face
-        );
-        MeshView pyramid = new MeshView(pyramidMesh);
-        pyramid.setDrawMode(DrawMode.FILL);
-        pyramid.setMaterial(redMaterial);
-
-        Xform pyramidXform = new Xform();
-        pyramidXform.getChildren().add(pyramid);
-        modelGroup.getChildren().add(pyramidXform);
-    }
-
-    public void addPyramid() {
-        createTria();
-        scene.setRoot(root);
-    }
-
     public void createEmptyScene(int largeur, int hauteur) {
 
         root.getChildren().add(world);
@@ -213,7 +183,7 @@ public class InterfaceVue {
         MeshView part = new MeshView(partMesh);
         part.setDrawMode(DrawMode.FILL);
         part.setMaterial(redMaterial);
-        part.setCullFace(CullFace.NONE);
+        //part.setCullFace(CullFace.NONE);
 
 
         Xform partXform = new Xform();

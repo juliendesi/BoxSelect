@@ -59,5 +59,9 @@ public class CONTROLLER {
         return modelGraphic;
     }
 
+    public int getNumberOfPart() {
+        return model.numberOfParts();
+    }
+
 
 }

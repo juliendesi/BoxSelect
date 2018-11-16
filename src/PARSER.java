@@ -355,7 +355,7 @@ public class PARSER {
                 break;
             }
             if (ligne.charAt(i) != '_' && ligne.charAt(i) != '#')
-                if (Character.isLetter(ligne.charAt(i)) == false) {
+                if (Character.isLetter(ligne.charAt(i)) == false && Character.isDigit(ligne.charAt(i)) == false) {
                     char_detected = true;
                     break;
                 }

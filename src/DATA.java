@@ -111,8 +111,10 @@ public class DATA {
             elements_list.add(new ELEMENT(elem_id));
 
             for (int list = 1; list < result.length; list++) {
-                list_node_face = this.castTabObjectInTabInteger(result[list]);
-                elements_list.get(elements_list.size() - 1).addFace(new FACE(this.recupNodesFromId(list_node_face)));
+                if (result[list].size() != 0) {
+                    list_node_face = this.castTabObjectInTabInteger(result[list]);
+                    elements_list.get(elements_list.size() - 1).addFace(new FACE(this.recupNodesFromId(list_node_face)));
+                }
             }
             parser.clearResult();
         }

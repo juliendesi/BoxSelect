@@ -67,6 +67,9 @@ public class PART {
         //System.out.println("Face manquante : " + time_face_manquante);
         this.numberingFaces();
         this.detectInterfaceFromFaces();
+//        for (int i=0; i<face_exterieur.size(); i++){
+//            System.out.println(face_exterieur.get(i).toString());
+//        }
         //System.out.println("Finalisation de " + part_name + " : " + (System.currentTimeMillis() - time_face_manquante - time) + "ms");
     }
 

@@ -140,8 +140,10 @@ public class FENETRE extends JFrame {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    vue.addPart(moduleGraphic.getIndicesFacesByPart(0), moduleGraphic.getVerticesCoordByPart(0));
-                    System.out.println("Piece affichée");
+                    for (int i = 0; i < controller.getNumberOfPart(); i++) {
+                        vue.addPart(moduleGraphic.getIndicesFacesByPart(i), moduleGraphic.getVerticesCoordByPart(i));
+                    }
+                    System.out.println("Pieces affichées");
                 }
             });
 

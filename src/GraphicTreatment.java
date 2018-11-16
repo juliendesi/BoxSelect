@@ -60,7 +60,7 @@ public class GraphicTreatment {
                     listIndice.add(0);
                 }
             } else if (nbNodeInFace == 4) {
-                for (int j = 0; j < 2; j++) {
+                for (int j = 0; j < 3; j++) {
                     listIndice.add(facesList.get(i).getNodes_list().get(j).getIndiceGraphic());
                     listIndice.add(0);
                 }

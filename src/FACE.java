@@ -56,4 +56,16 @@ public class FACE extends REFERENCE {
     public int getNbNode() {
         return nodes_list.size();
     }
+
+    @Override
+    public String toString() {
+        String texte = "";
+        for (int i = 0; i < nodes_list.size(); i++) {
+            texte = texte + nodes_list.get(i).getId() + " ";
+        }
+        texte = texte + "\n";
+        return texte;
+    }
 }
+
+
