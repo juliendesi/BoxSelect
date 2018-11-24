@@ -86,5 +86,12 @@ public class GraphicTreatment {
         return nodeCoord.get(partId);
     }
 
-
+    public ArrayList<double[]> getNodeSelected(int idContact) {
+        ArrayList<double[]> coordNodeSelected = new ArrayList<>();
+        ArrayList<NODE> listNodes = model.getContact(idContact).getSelection().getNodes_list();
+        for (int i = 0; i < listNodes.size(); i++) {
+            coordNodeSelected.add(listNodes.get(i).getCoord());
+        }
+        return coordNodeSelected;
+    }
 }

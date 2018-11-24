@@ -11,20 +11,28 @@ public class DATA {
     private ArrayList<ELEMENT> elements_list;
     private ArrayList<PART> parts_list;
     private int current_line_index;
+    private int nbLigneFichier;
 
 
-    public DATA(String adresse_fichier){
+    public DATA() {
+        current_line_index = 0;
         nodes_list = new ArrayList<>();
         elements_list = new ArrayList<>();
         parts_list = new ArrayList<>();
-        long time = System.currentTimeMillis();
-        ArrayList<String> recup_fichier = this.getStringFromFile(adresse_fichier);
+    }
 
+    public void setAdresse(String adresse_fichier) {
+
+        ArrayList<String> recup_fichier = this.getStringFromFile(adresse_fichier);
+        nbLigneFichier = recup_fichier.size();
+
+        long time = System.currentTimeMillis();
         this.getNodesFromText(recup_fichier);
         System.out.println("Récupération des noeuds : " + (System.currentTimeMillis() - time) + "ms");
 
         time = System.currentTimeMillis();
         this.getElementsFromText(recup_fichier);
+        System.out.println(elements_list.size());
         System.out.println("Récupération des éléments : " + (System.currentTimeMillis() - time) + "ms");
 
         time = System.currentTimeMillis();
@@ -55,33 +63,7 @@ public class DATA {
     }
 
     private void getNodesFromText(ArrayList<String> recup_fichier) {
-        int node_id;
-        double[] node_coord = new double[3];
-
-        PARSER parser = new PARSER(" I (int) X (double) Y (double) Z (double)", '$');
-
-        // Tant que la ligne ne contient pas ".NOE", on avance
-        for (current_line_index = 0; recup_fichier.get(current_line_index).contentEquals(".NOE") == false; current_line_index++)
-            ;
-        while (true) {
-            // Boucle jusqu'à ".xxx" ou si la ligne est vide ou ne contient que des spaces
-            current_line_index++;
-
-            // Utilisation d'un parser pour récupérer les données
-            if (parser.parseFromLine(recup_fichier.get(current_line_index)) == -1) {
-                if (recup_fichier.get(current_line_index).contains(".") == true) {
-                    break;
-                } else continue;
-
-            }
-            ArrayList<Object>[] result = parser.getResult();
-            node_id = (int) result[0].get(0);
-            for (int i = 0; i < 3; i++) {
-                node_coord[i] = (double) result[i + 1].get(0);
-            }
-            nodes_list.add(new NODE(node_id, node_coord, false));
-            parser.clearResult();
-        }
+        parallelizeNodesImport(recup_fichier, 4);
     }
 
     private void getElementsFromText(ArrayList<String> recup_fichier) {
@@ -89,10 +71,12 @@ public class DATA {
         ArrayList<Object>[] result;
         ArrayList<Integer> list_node_face;
         PARSER parser = new PARSER("I (int) N [(int) ] */0 [(int) ]", '$');
+        System.out.println(countNbElementsInFile(recup_fichier));
 
         for (int i = current_line_index; recup_fichier.get(i).contentEquals(".MAI") == false; i++) {
             current_line_index = i;
         }
+        current_line_index++;
         while (true) {
             current_line_index++;
             parser.setDebut_texte(current_line_index);
@@ -265,6 +249,141 @@ public class DATA {
 
     public ArrayList<PART> getParts_list() {
         return parts_list;
+    }
+
+    public int getCurrentLine() {
+        return current_line_index;
+    }
+
+    public int getNbLigneFichier() {
+        return nbLigneFichier;
+    }
+
+    private int countNbNodesInFile(ArrayList<String> recup_fichier) {
+        int currentLine, nbNodes = 0;
+        // Tant que la ligne ne contient pas ".NOE", on avance
+        for (currentLine = 0; recup_fichier.get(currentLine).contentEquals(".NOE") == false; currentLine++) ;
+        currentLine++;
+        while (recup_fichier.get(currentLine).contains(".MAI") == false) {
+            int nbCaracInLine = recup_fichier.get(currentLine).length();
+            if (recup_fichier.get(currentLine).contains("!") == true) {
+                recup_fichier.remove(currentLine);
+            } else if (nbCaracInLine != 0) {
+                // cas ligne contient espace au début
+                int currentCaracPosition = 0;
+                while (recup_fichier.get(currentLine).charAt(currentCaracPosition) == ' ') {
+                    if (currentCaracPosition == nbCaracInLine - 1) {
+                        break;
+                    }
+                    currentCaracPosition++;
+                }
+                if (recup_fichier.get(currentLine).charAt(currentCaracPosition) == 'I') {
+                    nbNodes++;
+                    currentLine++;
+                } else recup_fichier.remove(currentLine);
+            } else recup_fichier.remove(currentLine);
+        }
+        return nbNodes;
+    }
+
+    private void parallelizeNodesImport(ArrayList<String> recup_fichier, int nbThread) {
+        int nbNodes = countNbNodesInFile(recup_fichier);
+
+        int[] borne = new int[nbThread * 2];
+        for (int i = 0; i < nbThread; i++) {
+            borne[2 * i] = i * nbNodes / nbThread + 1;
+            borne[2 * i + 1] = (i + 1) * nbNodes / nbThread + 1;
+        }
+
+        ArrayList<NODE>[] list = new ArrayList[nbThread];
+        Thread[] threadTab = new Thread[nbThread];
+
+        for (int numThread = 0; numThread < nbThread; numThread++) {
+            list[numThread] = new ArrayList<>(1000);
+            threadTab[numThread] = new Thread(new NodeThread(borne[2 * numThread], borne[2 * numThread + 1], recup_fichier, list[numThread]));
+            threadTab[numThread].start();
+        }
+
+        while (true) {
+            int ready = 1;
+            for (int numThread = 0; numThread < nbThread; numThread++) {
+                if (threadTab[numThread].getState() != Thread.State.TERMINATED) {
+                    ready *= 0;
+                }
+            }
+            if (ready == 1) {
+                for (int numThread = 0; numThread < nbThread; numThread++) {
+                    nodes_list.addAll(list[numThread]);
+                }
+                break;
+            }
+        }
+
+    }
+
+    private int countNbElementsInFile(ArrayList<String> recup_fichier) {
+        int currentLine, nbElements = 0;
+        // Tant que la ligne ne contient pas ".NOE", on avance
+        for (currentLine = 0; recup_fichier.get(currentLine).contentEquals(".MAI") == false; currentLine++) ;
+        currentLine++;
+        while (recup_fichier.get(currentLine).contains(".") == false) {
+            int nbCaracInLine = recup_fichier.get(currentLine).length();
+            if (recup_fichier.get(currentLine).contains("!") == true) {
+                recup_fichier.remove(currentLine);
+            } else if (nbCaracInLine != 0) {
+                // cas ligne contient espace au début
+                int currentCaracPosition = 0;
+                while (recup_fichier.get(currentLine).charAt(currentCaracPosition) == ' ') {
+                    if (currentCaracPosition == nbCaracInLine - 1) {
+                        break;
+                    }
+                    currentCaracPosition++;
+                }
+                if (recup_fichier.get(currentLine).charAt(currentCaracPosition) == 'I') {
+                    nbElements++;
+                }
+                currentLine++;
+            } else recup_fichier.remove(currentLine);
+        }
+        return nbElements;
+    }
+
+    private class NodeThread implements Runnable {
+
+        private int borneInf;
+        private int borneSup;
+        private ArrayList<NODE> nodeList;
+        private ArrayList<String> recupFichier;
+
+        public NodeThread(int paramBorneInf, int paramBorneSup, ArrayList<String> paramRecupFichier, ArrayList<NODE> paramNodeList) {
+            borneInf = paramBorneInf;
+            borneSup = paramBorneSup;
+            recupFichier = paramRecupFichier;
+            nodeList = paramNodeList;
+        }
+
+        @Override
+        public void run() {
+            double[] node_coord = new double[3];
+            int node_id;
+            PARSER parser = new PARSER(" I (int) X (double) Y (double) Z (double)", '$');
+            for (int i = borneInf; i < borneSup; i++) {
+                // Utilisation d'un parser pour récupérer les données
+                if (parser.parseFromLine(recupFichier.get(i)) == -1) {
+                    if (recupFichier.get(i).contains(".") == true) {
+                        break;
+                    } else continue;
+
+                }
+                ArrayList<Object>[] result = parser.getResult();
+                node_id = (int) result[0].get(0);
+                for (int j = 0; j < 3; j++) {
+                    node_coord[j] = (double) result[j + 1].get(0);
+                }
+                nodeList.add(new NODE(node_id, node_coord, false));
+                parser.clearResult();
+            }
+        }
     }
 
 }

@@ -1,39 +1,34 @@
 import javafx.event.EventHandler;
-import javafx.scene.*;
+import javafx.geometry.Point3D;
+import javafx.scene.DepthTest;
+import javafx.scene.Group;
+import javafx.scene.PerspectiveCamera;
+import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.Box;
-import javafx.scene.shape.DrawMode;
-import javafx.scene.shape.MeshView;
-import javafx.scene.shape.TriangleMesh;
+import javafx.scene.shape.*;
+import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Transform;
+import javafx.scene.transform.Translate;
+
+import java.util.ArrayList;
 
 public class InterfaceVue {
 
     private static final double CAMERA_INITIAL_DISTANCE = -1500;
-    private static final double CAMERA_INITIAL_X_ANGLE = 70.0;
-    private static final double CAMERA_INITIAL_Y_ANGLE = 320.0;
     private static final double CAMERA_NEAR_CLIP = 0.01;
     private static final double CAMERA_FAR_CLIP = 100000.0;
     private static final double AXIS_LENGTH = 50.0;
-    private static final double CONTROL_MULTIPLIER = 0.1;
-    private static final double SHIFT_MULTIPLIER = 10.0;
-    private static final double MOUSE_SPEED = 0.1;
-    private static final double ROTATION_SPEED = 2.0;
-    private static final double TRACK_SPEED = 0.3;
-    private static final double HAUTEUR_FEN = 300;
-    private static final double LARGEUR_FEN = 300;
     final Xform modelGroup = new Xform();
+    final Group nodeSelected = new Group();
     final Group root = new Group();
     final Xform axisGroup = new Xform();
-    //final ParallelCamera camera = new ParallelCamera();
     final PerspectiveCamera camera = new PerspectiveCamera(true);
-    final Xform world = new Xform();
+    final XformWorld world = new XformWorld();
     private Scene scene;
-    final Xform cameraXform = new Xform();
-    final Xform cameraXform2 = new Xform();
-    final Xform cameraXform3 = new Xform();
+    final XformCamera cameraXform = new XformCamera();
     double mousePosX;
     double mousePosY;
     double mouseOldX;
@@ -41,20 +36,12 @@ public class InterfaceVue {
     double mouseDeltaX;
     double mouseDeltaY;
 
-    private void buildCamera(int largeur, int hauteur) {
+    private void buildCamera() {
         root.getChildren().add(cameraXform);
-        cameraXform.getChildren().add(cameraXform2);
-        cameraXform2.getChildren().add(cameraXform3);
-        cameraXform3.getChildren().add(camera);
-
+        cameraXform.getChildren().add(camera);
         camera.setNearClip(CAMERA_NEAR_CLIP);
         camera.setFarClip(CAMERA_FAR_CLIP);
-
         camera.setTranslateZ(CAMERA_INITIAL_DISTANCE);
-        //cameraXform.ry.setAngle(CAMERA_INITIAL_Y_ANGLE);
-        //cameraXform.rx.setAngle(CAMERA_INITIAL_X_ANGLE);
-
-        //cameraXform.setTranslate(-largeur / 2, -hauteur / 2, -300);
     }
 
     private void buildAxes() {
@@ -83,61 +70,34 @@ public class InterfaceVue {
         world.getChildren().addAll(axisGroup);
     }
 
-    private void handleMouse(Scene scene, final Node root) {
-        scene.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent me) {
-                mousePosX = me.getSceneX();
-                mousePosY = me.getSceneY();
-                mouseOldX = me.getSceneX();
-                mouseOldY = me.getSceneY();
-            }
+    private void handleMouse() {
+        scene.setOnMousePressed((MouseEvent me) -> {
+            mousePosX = me.getSceneX();
+            mousePosY = me.getSceneY();
+            mouseOldX = me.getSceneX();
+            mouseOldY = me.getSceneY();
         });
-        scene.setOnMouseDragged(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent me) {
-                mouseOldX = mousePosX;
-                mouseOldY = mousePosY;
-                mousePosX = me.getSceneX();
-                mousePosY = me.getSceneY();
-                mouseDeltaX = (mousePosX - mouseOldX);
-                mouseDeltaY = (mousePosY - mouseOldY);
-
-                double modifier = 1.0;
-
-                if (me.isControlDown()) {
-                    modifier = CONTROL_MULTIPLIER;
-                }
-                if (me.isShiftDown()) {
-                    modifier = SHIFT_MULTIPLIER;
-                }
-                if (me.isPrimaryButtonDown()) {
-                    cameraXform.ry.setAngle(cameraXform.ry.getAngle() - mouseDeltaX * MOUSE_SPEED * modifier * ROTATION_SPEED);
-                    cameraXform.rx.setAngle(cameraXform.rx.getAngle() + mouseDeltaY * MOUSE_SPEED * modifier * ROTATION_SPEED);
-                } else if (me.isSecondaryButtonDown()) {
-                    double z = camera.getTranslateZ();
-                    double newZ = z + mouseDeltaX * MOUSE_SPEED * modifier;
-                    camera.setTranslateZ(newZ);
-                } else if (me.isMiddleButtonDown()) {
-                    cameraXform2.t.setX(cameraXform2.t.getX() + mouseDeltaX * MOUSE_SPEED * modifier * TRACK_SPEED);
-                    cameraXform2.t.setY(cameraXform2.t.getY() + mouseDeltaY * MOUSE_SPEED * modifier * TRACK_SPEED);
-                }
+        scene.setOnMouseDragged((MouseEvent me) -> {
+            mouseOldX = mousePosX;
+            mouseOldY = mousePosY;
+            mousePosX = me.getSceneX();
+            mousePosY = me.getSceneY();
+            mouseDeltaX = (mousePosX - mouseOldX);
+            mouseDeltaY = (mousePosY - mouseOldY);
+            if (me.isPrimaryButtonDown()) {
+                cameraXform.ry(mouseDeltaX * 180.0 / scene.getWidth());
+                cameraXform.rx(-mouseDeltaY * 180.0 / scene.getHeight());
+            } else if (me.isSecondaryButtonDown()) {
+                camera.setTranslateZ(camera.getTranslateZ() + mouseDeltaY);
             }
         });
     }
 
-    private void handleKeyboard(Scene scene, final Node root) {
+    private void handleKeyboard() {
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
                 switch (event.getCode()) {
-                    case Z:
-                        cameraXform2.t.setX(0.0);
-                        cameraXform2.t.setY(0.0);
-                        camera.setTranslateZ(CAMERA_INITIAL_DISTANCE);
-                        cameraXform.ry.setAngle(CAMERA_INITIAL_Y_ANGLE);
-                        cameraXform.rx.setAngle(CAMERA_INITIAL_X_ANGLE);
-                        break;
                     case X:
                         axisGroup.setVisible(!axisGroup.isVisible());
                         break;
@@ -154,14 +114,15 @@ public class InterfaceVue {
         root.getChildren().add(world);
         root.setDepthTest(DepthTest.ENABLE);
 
-        buildCamera(largeur, hauteur);
+        buildCamera();
         buildAxes();
 
         world.getChildren().add(modelGroup);
+        world.getChildren().add(nodeSelected);
         scene = new Scene(root, largeur, hauteur, true);
         scene.setFill(Color.DARKGREY);
-        handleKeyboard(scene, world);
-        handleMouse(scene, world);
+        handleKeyboard();
+        handleMouse();
 
         scene.setCamera(camera);
     }
@@ -170,7 +131,7 @@ public class InterfaceVue {
         return scene;
     }
 
-    public void createPart(int[] faceIndices, float[] verticesCoord) {
+    private void createPart(int[] faceIndices, float[] verticesCoord) {
         final PhongMaterial redMaterial = new PhongMaterial();
         redMaterial.setDiffuseColor(Color.DARKRED);
         redMaterial.setSpecularColor(Color.RED);
@@ -195,6 +156,76 @@ public class InterfaceVue {
     public void addPart(int[] faceIndices, float[] verticesCoord) {
         createPart(faceIndices, verticesCoord);
         scene.setRoot(root);
+    }
+
+    private void createSphere(ArrayList<double[]> coord, double rayon) {
+        final PhongMaterial whiteMaterial = new PhongMaterial();
+        whiteMaterial.setDiffuseColor(Color.LIGHTGRAY);
+        whiteMaterial.setSpecularColor(Color.WHITE);
+
+        for (int i = 0; i < coord.size(); i++) {
+            Sphere node = new Sphere(rayon, 4);
+            node.setDrawMode(DrawMode.FILL);
+            node.setMaterial(whiteMaterial);
+
+            //Xform nodeXform = new Xform();
+            Group test = new Group(node);
+            test.setTranslateX(coord.get(i)[0]);
+            test.setTranslateY(coord.get(i)[1]);
+            test.setTranslateZ(coord.get(i)[2]);
+            nodeSelected.getChildren().addAll(test);
+            //nodeXform.getChildren().add(node);
+            //nodeXform.setTranslate(coord.get(i)[0], coord.get(i)[1], coord.get(i)[2]);
+            //nodeSelected.getChildren().addAll(nodeXform);
+        }
+    }
+
+    public void addSphere(ArrayList<double[]> coord, double rayon) {
+        createSphere(coord, rayon);
+        scene.setRoot(root);
+    }
+
+    public void clearNodeSelected() {
+        nodeSelected.getChildren().removeAll();
+        scene.setRoot(root);
+    }
+
+}
+
+class XformWorld extends Group {
+    final Translate t = new Translate(0.0, 0.0, 0.0);
+    final Rotate rx = new Rotate(0, 0, 0, 0, Rotate.X_AXIS);
+    final Rotate ry = new Rotate(0, 0, 0, 0, Rotate.Y_AXIS);
+    final Rotate rz = new Rotate(0, 0, 0, 0, Rotate.Z_AXIS);
+
+    public XformWorld() {
+        super();
+        this.getTransforms().addAll(t, rx, ry, rz);
+    }
+}
+
+class XformCamera extends Group {
+    Point3D px = new Point3D(1.0, 0.0, 0.0);
+    Point3D py = new Point3D(0.0, 1.0, 0.0);
+    Rotate r;
+    Transform t = new Rotate();
+
+    public XformCamera() {
+        super();
+    }
+
+    public void rx(double angle) {
+        r = new Rotate(angle, px);
+        this.t = t.createConcatenation(r);
+        this.getTransforms().clear();
+        this.getTransforms().addAll(t);
+    }
+
+    public void ry(double angle) {
+        r = new Rotate(angle, py);
+        this.t = t.createConcatenation(r);
+        this.getTransforms().clear();
+        this.getTransforms().addAll(t);
     }
 
 }

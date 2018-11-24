@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="BoxSelect:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/BoxSelect_jar</output-path>
+    <root id="archive" name="BoxSelect.jar">
+      <element id="module-output" name="BoxSelect" />
+    </root>
+  </artifact>
+</component>

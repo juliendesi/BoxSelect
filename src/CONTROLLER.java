@@ -50,7 +50,7 @@ public class CONTROLLER {
         return this.model.getContact(idContact).getParameters();
     }
 
-    public void setParameters(int idContact, ArrayList<Double> list_parameters) {
+    public void sendParametersToContact(int idContact, ArrayList<Double> list_parameters) {
         this.model.getContact(idContact).setParameters(list_parameters);
     }
 
@@ -63,5 +63,23 @@ public class CONTROLLER {
         return model.numberOfParts();
     }
 
+    public FENETRE getView() {
+        return view;
+    }
 
+    public double getImportAvancement() {
+        return model.getImportState();
+    }
+
+    public int getCurrentLineImport() {
+        return model.getCurrentLineImport();
+    }
+
+    public double getGlobalAvancement() {
+        double ratio = 0.0;
+        //considérer que l'import du fichier correspond à 50%
+        //
+
+        return ratio;
+    }
 }

@@ -409,7 +409,8 @@ public class DialogContact extends JDialog {
         public void keyReleased(KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_TAB || e.getKeyCode() == KeyEvent.VK_ENTER) {
                 // on récupère toutes les valeurs des champs et on les envoie au controller
-                controller.setParameters(idContact, DialogContact.this.getCylindreStructValues());
+                controller.sendParametersToContact(idContact, DialogContact.this.getCylindreStructValues());
+                controller.getView().addNodeIntersection(idContact);
             }
         }
 
@@ -424,7 +425,8 @@ public class DialogContact extends JDialog {
         @Override
         public void mouseReleased(MouseEvent e) {
             // on récupère toutes les valeurs des champs et on les envoie au controller
-            controller.setParameters(idContact, DialogContact.this.getCylindreStructValues());
+            controller.sendParametersToContact(idContact, DialogContact.this.getCylindreStructValues());
+            controller.getView().addNodeIntersection(idContact);
         }
 
         @Override
@@ -450,7 +452,8 @@ public class DialogContact extends JDialog {
         public void keyReleased(KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_TAB || e.getKeyCode() == KeyEvent.VK_ENTER) {
                 // on récupère toutes les valeurs des champs et on les envoie au controller
-                controller.setParameters(idContact, DialogContact.this.getCylindreCpointValues());
+                controller.sendParametersToContact(idContact, DialogContact.this.getCylindreCpointValues());
+                controller.getView().addNodeIntersection(idContact);
             }
         }
 
@@ -465,7 +468,8 @@ public class DialogContact extends JDialog {
         @Override
         public void mouseReleased(MouseEvent e) {
             // on récupère toutes les valeurs des champs et on les envoie au controller
-            controller.setParameters(idContact, DialogContact.this.getCylindreCpointValues());
+            controller.sendParametersToContact(idContact, DialogContact.this.getCylindreCpointValues());
+            controller.getView().addNodeIntersection(idContact);
         }
 
         @Override
@@ -477,5 +481,6 @@ public class DialogContact extends JDialog {
         }
     }
 
-
+    //TODO Ajouter checkbox ORIENT avec champ TOL
+    //todo Ajouter option PEAU 0
 }

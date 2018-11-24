@@ -9,6 +9,7 @@ public class MODEL {
     private CONTROLLER controller;
 
     public MODEL(CONTROLLER controller) {
+        data = new DATA();
         parts_list = new ArrayList<>();
         parts_list_name = new ArrayList<>();
         contacts_list = new ArrayList<>();
@@ -16,15 +17,15 @@ public class MODEL {
     }
 
     public void importData(String adresse) {
-        data = new DATA(adresse);
+        data.setAdresse(adresse);
         parts_list = data.getParts_list();
         this.finalizeParts();
         System.out.println("File import done");
     }
 
     private void finalizeParts() {
-        for (PART aParts_list : parts_list) {
-            aParts_list.finalizePart();
+        for (PART part : parts_list) {
+            part.finalizePart();
         }
         this.setParts_list_name();
     }
@@ -58,5 +59,14 @@ public class MODEL {
 
     public void removeContact(int id_contact) {
         contacts_list.remove(id_contact);
+    }
+
+    public double getImportState() {
+        double ratio = (double) (data.getCurrentLine()) / (double) (data.getNbLigneFichier());
+        return ratio;
+    }
+
+    public int getCurrentLineImport() {
+        return data.getCurrentLine();
     }
 }

@@ -21,7 +21,7 @@ public class REFERENCE implements Comparable {
 
     @Override
     public boolean equals(Object obj) {
-        ELEMENT other = (ELEMENT) obj;
+        REFERENCE other = (REFERENCE) obj;
         return other.id == this.id;
     }
 

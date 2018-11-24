@@ -14,6 +14,8 @@ public class FENETRE extends JFrame {
     private GraphicTreatment moduleGraphic;
     private InterfaceVue vue;
     private JTree tree;
+    private JProgressBar bar;
+    private Thread barThread;
     private DefaultTreeModel tree_model;
     private DefaultMutableTreeNode racine;
     private JButton add_contact_button;
@@ -43,8 +45,17 @@ public class FENETRE extends JFrame {
         graphique.setBackground(Color.BLACK);
         contenu_graphique.add(graphique);
 
+        //Ajout d'une barre de progression pour import
+        //barThread = new Thread(new TraitementImport());
+        bar = new JProgressBar();
+        bar.setVisible(false);
+        /*bar.setMaximum(100);
+        bar.setMinimum(0);
+        bar.setStringPainted(true);*/
+
         this.getContentPane().add(menu, BorderLayout.NORTH);
         this.getContentPane().add(contenu_graphique, BorderLayout.CENTER);
+        this.getContentPane().add(bar, BorderLayout.SOUTH);
         this.buildTree();
 
         import_button.addActionListener(new AddImportListener());
@@ -58,6 +69,8 @@ public class FENETRE extends JFrame {
                 initFX(graphique);
             }
         });
+
+        //barThread.start();
     }
 
     private void initFX(JFXPanel fxPanel) {
@@ -122,11 +135,24 @@ public class FENETRE extends JFrame {
         }
     }
 
+    public void addNodeIntersection(int idContact) {
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                ArrayList<double[]> coordNodeSelected = moduleGraphic.getNodeSelected(idContact);
+                vue.clearNodeSelected();
+                vue.addSphere(coordNodeSelected, 1.5);
+            }
+        });
+
+
+    }
+
     public class AddImportListener implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            ArrayList<String> name_list;
             // création de la boîte de dialogue
             JFileChooser dialogue = new JFileChooser();
 
@@ -135,22 +161,66 @@ public class FENETRE extends JFrame {
 
             // récupération du fichier sélectionné
             System.out.println("Fichier choisi : " + dialogue.getSelectedFile().getAbsolutePath());
-            controller.importData(dialogue.getSelectedFile().getAbsolutePath());
-            moduleGraphic = controller.setGraphicTreatment();
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    for (int i = 0; i < controller.getNumberOfPart(); i++) {
-                        vue.addPart(moduleGraphic.getIndicesFacesByPart(i), moduleGraphic.getVerticesCoordByPart(i));
+
+            //Lancement de la barre de progression
+            barThread = new Thread(new TraitementImport());
+            barThread.start();
+
+            Thread test = new Thread(() -> {
+                //System.out.println("Lancement thread traitement");
+                controller.importData(dialogue.getSelectedFile().getAbsolutePath());
+                moduleGraphic = controller.setGraphicTreatment();
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (int i = 0; i < controller.getNumberOfPart(); i++) {
+                            vue.addPart(moduleGraphic.getIndicesFacesByPart(i), moduleGraphic.getVerticesCoordByPart(i));
+                        }
+                        System.out.println("Pieces affichées");
                     }
-                    System.out.println("Pieces affichées");
+                });
+                ArrayList<String> name_list;
+                name_list = controller.getPartsListName();
+                for (String name : name_list) {
+                    FENETRE.this.addPartToTree(name);
                 }
             });
+            test.start();
 
-            name_list = controller.getPartsListName();
-            for (String name : name_list) {
-                FENETRE.this.addPartToTree(name);
+        }
+    }
+
+    private class TraitementImport implements Runnable {
+
+        @Override
+        public void run() {
+            bar.setVisible(true);
+            bar.setMinimum(0);
+            bar.setMaximum(99);
+            bar.setValue(0);
+            while (controller.getCurrentLineImport() == 0) {
+                //System.out.println("Lancement thread bar");
+
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
+            while (controller.getImportAvancement() < 0.999) {
+                //System.out.println(controller.getImportAvancement() * 100);
+                bar.setValue((int) (controller.getImportAvancement() * 100));
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            bar.setValue(100);
+            bar.setVisible(false);
         }
     }
 }
+
+//todo ajouter option filaire et opacité
+// todo ajout controle avec tree (clic droit -> modifier contact, modifier propriété d'une piece uniquement (couleur, opacité)

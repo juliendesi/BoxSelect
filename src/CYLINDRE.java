@@ -82,6 +82,7 @@ public class CYLINDRE extends SELECTION {
                 nodes_list.add(aList_node);
             } else aList_node.setHighlight(false);
         }
+        System.out.println(nodes_list.size() + " nodes selected");
     }
 
     protected void setOrientation() {
